@@ -18,4 +18,5 @@ public class Movie extends BaseModel {
     @Enumerated(EnumType.STRING)
     @ElementCollection
     private List<Feature> features;
+    private String genre;
 }
