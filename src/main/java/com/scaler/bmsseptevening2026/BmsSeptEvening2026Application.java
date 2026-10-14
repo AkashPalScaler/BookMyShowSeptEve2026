@@ -1,13 +1,11 @@
 package com.scaler.bmsseptevening2026;
 
-import com.scaler.bmsseptevening2026.Models.Movie;
-import com.scaler.bmsseptevening2026.Models.Region;
-import com.scaler.bmsseptevening2026.Models.Screen;
-import com.scaler.bmsseptevening2026.Models.Theatre;
+import com.scaler.bmsseptevening2026.Models.*;
 import com.scaler.bmsseptevening2026.Repositories.MovieRepository;
 import com.scaler.bmsseptevening2026.Repositories.RegionRepository;
 import com.scaler.bmsseptevening2026.Repositories.ScreenRepository;
 import com.scaler.bmsseptevening2026.Repositories.TheatreRepository;
+import com.scaler.bmsseptevening2026.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -17,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.query.FluentQuery;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -33,6 +32,8 @@ public class BmsSeptEvening2026Application implements CommandLineRunner {
     MovieRepository movieRepository;
     @Autowired
     ScreenRepository screenRepository;
+    @Autowired
+    private UserService userService;
 
     public static void main(String[] args) {
         SpringApplication.run(BmsSeptEvening2026Application.class, args);
@@ -116,12 +117,44 @@ public class BmsSeptEvening2026Application implements CommandLineRunner {
 //            System.out.println(screen.getName());
 //        }
         // select s1_0.id,s1_0.created_at,s1_0.name,s1_0.theatre_id,s1_0.updated_at from screen s1_0 left join theatre t1_0 on t1_0.id=s1_0.theatre_id left join region r1_0 on r1_0.id=t1_0.region_id where r1_0.name=?
-        List<Screen> allScreensInMumbai = screenRepository.findByTheatre_Region_Name("Mumbai");
-        for(Screen screen : allScreensInMumbai) {
-            System.out.println(screen.getName());
-        }
+//        List<Screen> allScreensInMumbai = screenRepository.findByTheatre_Region_Name("Mumbai");
+//        for(Screen screen : allScreensInMumbai) {
+//            System.out.println(screen.getName());
+//        }
+
+//        User user2  = userService.signup("Akash2", "akash2@gmail.com", "passpass2");
+//        User user3  = userService.signup("Akash3", "akash3@gmail.com", "passpass2");
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        System.out.println(passwordEncoder.matches("passpass2", "$2a$10$J9s72zqIc6MlZBgvt/0EEuyi66Di1AahYn/vtZIraCfeMLqO4r.3G"));
+        System.out.println(passwordEncoder.matches("passpass2", "$2a$10$9zL1WeRS6ZL55.iMNefOFefM4J9jN/eoOlshTkrK0AYwzhTsD7a0."));
+        System.out.println(passwordEncoder.matches("passpass1", "$2a$10$9zL1WeRS6ZL55.iMNefOFefM4J9jN/eoOlshTkrK0AYwzhTsD7a0."));
+        System.out.println(passwordEncoder.matches("passpass3", "$2a$10$9zL1WeRS6ZL55.iMNefOFefM4J9jN/eoOlshTkrK0AYwzhTsD7a0."));
+
+
     }
 }
 
 // AND - Condition where clauses on multiple primary attributes on the entity
 // UNDERSCORE -  Where clauses on foreign tables through join
+
+// Hash(one-way, meaning original value can't be recovered from hashedValue)
+// Same raw string passed through same hash function results into same hashedString
+// vs
+// encryption(two-way, original value can be recovered by decryption)
+//
+
+// To check the password : User logs in with rawPassword
+// 1) Hash(rawPassword) == hashedPassword [easier to implement, faster]
+// 2) Decrypt(encryptedPassword) == rawPassword [complex, slower]
+
+//$2a$10$N9qo8uLOickgx2ZMRZoMye.IjZAgcfl7p92ldGxad68LJZdL17lhWy
+//    └──────── salt ─────────┘ └────────── hash ──────────┘
+// Salt : A 22 character random string
+
+// User 1 : "passpass" -> Hash(passpass) -> ***hashed_passpass***
+// User 1 signs up: "passpass" -> Hash(passpass_randomsalt1) -> ***hashed_passpass_randomsalt1*** -> Store in DB version_cost_randomsalt1_***hashed_passpass_randomsalt1***
+// User 1 logs in: "passpass" -> Fetch the salt value from DB (version_cost_randomsalt1_***hashed_passpass_randomsalt1***)
+//                    -> randomsalt1 -> Hash("passpass" + randomSalt1) -> ***hashed_passpass_randomsalt1***
+
+// passpass12-38r7woebo38rg -> sameHash
+// passpassqejofh9u892439-8 -> sameHash
